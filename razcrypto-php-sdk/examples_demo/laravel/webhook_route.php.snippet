@@ -1,0 +1,36 @@
+<?php
+// routes/raz_webhook.php
+
+use Illuminate\Http\Request;
+use RazCrypto\Client;
+
+Route::post('/raz-webhook', function (Request $req) {
+    // 1) Raw body (do not json_encode again)
+    $raw = $req->getContent();
+
+    // 2) Signature header
+    $sig = $req->header('x-razcrypto-signature') ?? '';
+
+    // 3) Verify (constant-time compare)
+    if (!Client::verifyWebhook($raw, $sig, env('RAZ_SECRET_KEY'))) {
+        return response()->json(['error' => 'Invalid signature'], 401);
+    }
+
+    // 4) Parse
+    $data = $req->json()->all();
+    $event = $data['event'] ?? '';
+
+    // 5) Handle idempotently (use tx_hash/payment_id guards)
+    if ($event === 'payment.completed') {
+        $paymentId = $data['payment_id'] ?? '';
+        $amount    = (float)($data['amount'] ?? 0);
+        $txHash    = $data['tx_hash'] ?? '';
+
+        // TODO:
+        // - Check if $paymentId or $txHash already processed → skip
+        // - Credit wallet / mark order paid
+        // - Log delivery
+    }
+
+    return response()->json(['status' => 'ok']); // must return 2xx
+})->name('raz.webhook');

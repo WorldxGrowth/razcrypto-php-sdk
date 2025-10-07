@@ -1,0 +1,11 @@
+<?php
+// routes/web.php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DepositController;
+
+// Deposit (form submit)
+Route::post('/deposit', [DepositController::class, 'create'])->name('deposit');
+
+// Webhook (HMAC)
+require base_path('routes/raz_webhook.php'); // or paste snippet below
