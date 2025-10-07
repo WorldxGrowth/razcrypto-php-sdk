@@ -1,0 +1,25 @@
+{
+  "name": "worldxgrowth/razcrypto-php-sdk",
+  "description": "RazCrypto PHP SDK (server-to-server) with optional custom payment page (QR + address + amount), Laravel & Core PHP examples.",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4",
+    "guzzlehttp/guzzle": "^7.8 || ^7.9"
+  },
+  "autoload": {
+    "psr-4": {
+      "RazCrypto\\": "src/"
+    }
+  },
+  "authors": [
+    { "name": "RazCrypto", "email": "support@razcryptogateway.com" }
+  ],
+  "keywords": [
+    "razcrypto", "usdt", "bep-20", "crypto", "payment-gateway", "sdk", "laravel", "php"
+  ],
+  "support": {
+    "issues": "https://github.com/WorldxGrowth/razcrypto-php-sdk/issues",
+    "source": "https://github.com/WorldxGrowth/razcrypto-php-sdk"
+  }
+}
