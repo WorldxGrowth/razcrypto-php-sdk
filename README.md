@@ -7,7 +7,7 @@ Accept cryptocurrency payments (USDT, USDC, DAI) on BSC and Ethereum chains with
 Install the SDK via Composer:
 
 ```bash
-composer require razcrypto/razcrypto-php
+composer require worldxgrowth/razcrypto-php-sdk
 Quick Start
 1. Initialize the API
 Get your Gateway ID and Secret Key from the RazCrypto Dashboard.
