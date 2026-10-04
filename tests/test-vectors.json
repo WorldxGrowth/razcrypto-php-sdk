@@ -1,0 +1,613 @@
+{
+  "schema_version": 1,
+  "generated_by": "sdks/scripts/generate-vectors.mjs",
+  "cross_checked_with": "standardwebhooks@1.1.1",
+  "notes": [
+    "TEST-ONLY secrets. Values are generated deterministically; never edit by hand, re-run the generator.",
+    "webhook: HMAC key = base64-decode(secret without \"whsec_\"); signed_content = id + \".\" + timestamp + \".\" + raw_body (UTF-8 bytes).",
+    "webhook: inject `now` (unix seconds) as the verifier clock; reject when |now - timestamp| > tolerance_sec.",
+    "webhook: headers maps contain exactly what is sent; a missing key means the header is absent.",
+    "checkout: signature = lowercase hex HMAC_SHA256(secret_key as UTF-8, payment_id|reference_id|status); null reference_id -> \"\"."
+  ],
+  "webhook": [
+    {
+      "name": "valid_single_v1",
+      "description": "One v1 signature, compact JSON body.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_rotation_two_v1",
+      "description": "Secret rotation: two space-separated v1 entries, the first signed with the old secret, the second correct.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,0AyJ+p0hBm/yMkCqdMwWs+rYE68cjrUrKXpT8PIKoWo= v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_unknown_version_ignored",
+      "description": "An unknown scheme (v1a) is present and ignored; the v1 entry matches.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1a,2CQG8R63Pf733ROjelb9C/raT4KWd6wiwzgsonoOQkk= v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_unicode_whitespace_body",
+      "description": "Pretty-printed body with ₹, Hindi, emoji, tabs and an escaped \\u20b9. Must be verified over the exact raw bytes.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,iLYj2AjRqMynaHwoqitkateidzX0IoC+4dCjtBwKJhE="
+      },
+      "raw_body": "{\n  \"type\":   \"payment.paid\",\n  \"timestamp\": \"2026-01-01T00:00:00Z\",\n\t\"data\": {\n    \"object\": {\n      \"id\": \"pay_UnIc0de000000000000\",\n      \"status\": \"paid\",\n      \"amount\": \"1000.00\",\n      \"currency\": \"INR\",\n      \"reference_id\": \"ऑर्डर_१०४२\",\n      \"metadata\": { \"note\": \"₹1,000 भुगतान सफल 🎉\", \"escaped\": \"\\u20b9 stays escaped\" }\n    }\n  }\n}",
+      "raw_body_base64": "ewogICJ0eXBlIjogICAicGF5bWVudC5wYWlkIiwKICAidGltZXN0YW1wIjogIjIwMjYtMDEtMDFUMDA6MDA6MDBaIiwKCSJkYXRhIjogewogICAgIm9iamVjdCI6IHsKICAgICAgImlkIjogInBheV9VbkljMGRlMDAwMDAwMDAwMDAwIiwKICAgICAgInN0YXR1cyI6ICJwYWlkIiwKICAgICAgImFtb3VudCI6ICIxMDAwLjAwIiwKICAgICAgImN1cnJlbmN5IjogIklOUiIsCiAgICAgICJyZWZlcmVuY2VfaWQiOiAi4KSR4KSw4KWN4KSh4KSwX+Clp+ClpuClquClqCIsCiAgICAgICJtZXRhZGF0YSI6IHsgIm5vdGUiOiAi4oK5MSwwMDAg4KSt4KWB4KSX4KSk4KS+4KSoIOCkuOCkq+CksiDwn46JIiwgImVzY2FwZWQiOiAiXHUyMGI5IHN0YXlzIGVzY2FwZWQiIH0KICAgIH0KICB9Cn0=",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\n  \"type\":   \"payment.paid\",\n  \"timestamp\": \"2026-01-01T00:00:00Z\",\n\t\"data\": {\n    \"object\": {\n      \"id\": \"pay_UnIc0de000000000000\",\n      \"status\": \"paid\",\n      \"amount\": \"1000.00\",\n      \"currency\": \"INR\",\n      \"reference_id\": \"ऑर्डर_१०४२\",\n      \"metadata\": { \"note\": \"₹1,000 भुगतान सफल 🎉\", \"escaped\": \"\\u20b9 stays escaped\" }\n    }\n  }\n}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_trailing_newline_body",
+      "description": "Body ends with a newline; the newline is part of the signed content.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,5LwjYf1yKERhXPXfiKspbQLkPxIURbdS7NQQGmuntcM="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}\n",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19Cg==",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}\n",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_secret_without_prefix",
+      "description": "Secret passed as bare base64 without \"whsec_\" (accepted, same as the official libraries).",
+      "secret": "jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_mixed_case_headers",
+      "description": "Header names arrive in mixed case; lookup must be case-insensitive.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "Webhook-Id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "WEBHOOK-TIMESTAMP": "1767225600",
+        "Webhook-Signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_timestamp_at_past_tolerance_edge",
+      "description": "now - timestamp == tolerance exactly (inclusive).",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225900,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_timestamp_at_future_tolerance_edge",
+      "description": "timestamp - now == tolerance exactly (inclusive).",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225300,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_test_ping_event",
+      "description": "test.ping event type.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_TestPing00000000000",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,q6XCYdhP5qpET+DxhfY51cRHxOQnLeiWxXyneWfPgrU="
+      },
+      "raw_body": "{\"type\":\"test.ping\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{}}",
+      "raw_body_base64": "eyJ0eXBlIjoidGVzdC5waW5nIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7fX0=",
+      "signed_content": "evt_TestPing00000000000.1767225600.{\"type\":\"test.ping\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "invalid_wrong_secret",
+      "description": "Signed with a different secret.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,8M6/bJK2wm4NSWCySUN3IZTCQqDEEirRPsErTiEr4BE="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_old_secret_only",
+      "description": "After rotation ended: only the old secret signed it.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,0AyJ+p0hBm/yMkCqdMwWs+rYE68cjrUrKXpT8PIKoWo="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_tampered_body",
+      "description": "One byte of the body changed after signing (25.00 -> 26.00).",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"26.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjYuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_reserialized_body",
+      "description": "The unicode body was JSON-parsed and re-serialised before verifying. Proves verification must use the raw body.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,iLYj2AjRqMynaHwoqitkateidzX0IoC+4dCjtBwKJhE="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_UnIc0de000000000000\",\"status\":\"paid\",\"amount\":\"1000.00\",\"currency\":\"INR\",\"reference_id\":\"ऑर्डर_१०४२\",\"metadata\":{\"note\":\"₹1,000 भुगतान सफल 🎉\",\"escaped\":\"₹ stays escaped\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV9VbkljMGRlMDAwMDAwMDAwMDAwIiwic3RhdHVzIjoicGFpZCIsImFtb3VudCI6IjEwMDAuMDAiLCJjdXJyZW5jeSI6IklOUiIsInJlZmVyZW5jZV9pZCI6IuCkkeCksOCljeCkoeCksF/gpafgpabgpargpagiLCJtZXRhZGF0YSI6eyJub3RlIjoi4oK5MSwwMDAg4KSt4KWB4KSX4KSk4KS+4KSoIOCkuOCkq+CksiDwn46JIiwiZXNjYXBlZCI6IuKCuSBzdGF5cyBlc2NhcGVkIn19fX0=",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\n  \"type\":   \"payment.paid\",\n  \"timestamp\": \"2026-01-01T00:00:00Z\",\n\t\"data\": {\n    \"object\": {\n      \"id\": \"pay_UnIc0de000000000000\",\n      \"status\": \"paid\",\n      \"amount\": \"1000.00\",\n      \"currency\": \"INR\",\n      \"reference_id\": \"ऑर्डर_१०४२\",\n      \"metadata\": { \"note\": \"₹1,000 भुगतान सफल 🎉\", \"escaped\": \"\\u20b9 stays escaped\" }\n    }\n  }\n}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_tampered_id",
+      "description": "webhook-id changed after signing (replay under a new id).",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1d",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_timestamp_too_old",
+      "description": "now - timestamp = tolerance + 1.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225901,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "timestamp_outside_tolerance"
+      }
+    },
+    {
+      "name": "invalid_timestamp_too_new",
+      "description": "timestamp - now = tolerance + 1 (too far in the future).",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225299,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "timestamp_outside_tolerance"
+      }
+    },
+    {
+      "name": "invalid_missing_webhook_id",
+      "description": "webhook-id header absent.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "missing_header"
+      }
+    },
+    {
+      "name": "invalid_missing_webhook_timestamp",
+      "description": "webhook-timestamp header absent.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "missing_header"
+      }
+    },
+    {
+      "name": "invalid_missing_webhook_signature",
+      "description": "webhook-signature header absent.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600"
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "missing_header"
+      }
+    },
+    {
+      "name": "invalid_non_integer_timestamp",
+      "description": "webhook-timestamp is not an integer.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "not-a-number",
+        "webhook-signature": "v1,ZZaAkb9HNF0Oe72s/to84bENrvcvwl0xc/unSLtN5xg="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.not-a-number.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "invalid_timestamp"
+      }
+    },
+    {
+      "name": "invalid_non_v1_scheme_only",
+      "description": "Correct signature bytes but only under an unknown scheme (v1a); no v1 entry.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1a,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_signature_not_base64",
+      "description": "v1 value is not valid base64.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,!!!not*base64!!!"
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_truncated_signature",
+      "description": "v1 value truncated by 4 characters.",
+      "secret": "whsec_jFXhTOACYNuwgvu2rasj75PN9ucla5mYDR2dT+xNW+E=",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC"
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_secret_encoding",
+      "description": "Secret after \"whsec_\" is not valid base64.",
+      "secret": "whsec_not*valid*base64!",
+      "headers": {
+        "webhook-id": "evt_2kLq9VxP0aR7mN4sTz1c",
+        "webhook-timestamp": "1767225600",
+        "webhook-signature": "v1,NomEsTVxoLhtShnwSTfaxbhzBzfR4XcVRReKXfCC2OQ="
+      },
+      "raw_body": "{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "raw_body_base64": "eyJ0eXBlIjoicGF5bWVudC5wYWlkIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMFoiLCJkYXRhIjp7Im9iamVjdCI6eyJpZCI6InBheV8zZks5c1EybVp0N0x4UjFhUHEwQiIsIm9iamVjdCI6InBheW1lbnQiLCJzdGF0dXMiOiJwYWlkIiwiYW1vdW50IjoiMjUuMDAiLCJjdXJyZW5jeSI6IlVTRCIsInJlZmVyZW5jZV9pZCI6Im9yZGVyXzEwNDIiLCJtZXRhZGF0YSI6eyJjYXJ0X2lkIjoiY183NyJ9fX19",
+      "signed_content": "evt_2kLq9VxP0aR7mN4sTz1c.1767225600.{\"type\":\"payment.paid\",\"timestamp\":\"2026-01-01T00:00:00Z\",\"data\":{\"object\":{\"id\":\"pay_3fK9sQ2mZt7LxR1aPq0B\",\"object\":\"payment\",\"status\":\"paid\",\"amount\":\"25.00\",\"currency\":\"USD\",\"reference_id\":\"order_1042\",\"metadata\":{\"cart_id\":\"c_77\"}}}}",
+      "now": 1767225660,
+      "tolerance_sec": 300,
+      "expected": {
+        "valid": false,
+        "error_code": "invalid_secret"
+      }
+    }
+  ],
+  "checkout": [
+    {
+      "name": "valid_paid",
+      "description": "status paid with a reference_id.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "order_1042",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|paid",
+      "signature": "e519fe2ff2fb54f1be2cf8bd08adc21e17ab984cc5115e38b556ec0876b04f2a",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_confirming",
+      "description": "status confirming (onPending).",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "order_1042",
+      "status": "confirming",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|confirming",
+      "signature": "4fe9866150270b5cb30d5a8cc621c4ebcc74f6a1beddd09a455a68fe7b621171",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_reference_id_empty",
+      "description": "reference_id is the empty string.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B||paid",
+      "signature": "7f43de22bb3b2280f0b4ca31855cf7d927dc68b6646f9b23941912d47a085430",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_reference_id_null",
+      "description": "reference_id is null: treated as the empty string in the message.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": null,
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B||paid",
+      "signature": "7f43de22bb3b2280f0b4ca31855cf7d927dc68b6646f9b23941912d47a085430",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "valid_unicode_reference_id",
+      "description": "reference_id with Hindi digits and ₹ (signed as UTF-8).",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "ऑर्डर_१०४२_₹",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|ऑर्डर_१०४२_₹|paid",
+      "signature": "2c92b16c92c3c1a61c570e63e135a804a57f4477ea22aa99bc89c67e4b8d1880",
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "invalid_wrong_status",
+      "description": "Signature is for confirming, presented as paid.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "order_1042",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|confirming",
+      "signature": "4fe9866150270b5cb30d5a8cc621c4ebcc74f6a1beddd09a455a68fe7b621171",
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_swapped_fields",
+      "description": "payment_id and reference_id swapped relative to what was signed.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "order_1042",
+      "reference_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|paid",
+      "signature": "e519fe2ff2fb54f1be2cf8bd08adc21e17ab984cc5115e38b556ec0876b04f2a",
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_wrong_key",
+      "description": "Signed with a different secret key.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "order_1042",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|paid",
+      "signature": "f930b9f08ba368db86db44323382cc41279f898a932a2db03f16088cf63e35d7",
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_truncated_signature",
+      "description": "Hex signature truncated by 2 characters.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "order_1042",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|paid",
+      "signature": "e519fe2ff2fb54f1be2cf8bd08adc21e17ab984cc5115e38b556ec0876b04f",
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    },
+    {
+      "name": "invalid_tampered_reference_id",
+      "description": "reference_id changed after signing.",
+      "secret_key": "sk_test_7762443c107cc7c4e0d2dbd45645c097",
+      "payment_id": "pay_3fK9sQ2mZt7LxR1aPq0B",
+      "reference_id": "order_1043",
+      "status": "paid",
+      "message": "pay_3fK9sQ2mZt7LxR1aPq0B|order_1042|paid",
+      "signature": "e519fe2ff2fb54f1be2cf8bd08adc21e17ab984cc5115e38b556ec0876b04f2a",
+      "expected": {
+        "valid": false,
+        "error_code": "no_matching_signature"
+      }
+    }
+  ]
+}

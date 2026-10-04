@@ -1,81 +1,92 @@
-# RazCrypto PHP SDK
+# RazCrypto Gateway — PHP SDK
 
-Accept cryptocurrency payments (USDT, USDC, DAI) on BSC and Ethereum chains with ease using the official RazCrypto PHP SDK.
+Official PHP client for [RazCrypto Gateway](https://razcryptogateway.com), the non-custodial crypto payment gateway.
 
-## Installation
-
-Install the SDK via Composer:
+- **Composer:** `worldxgrowth/razcrypto-php-sdk`
+- **Requires:** PHP ≥ 8.1, cURL
+- **Dependencies:** no other Composer packages
+- **License:** MIT
 
 ```bash
 composer require worldxgrowth/razcrypto-php-sdk
-Quick Start
-1. Initialize the API
-Get your Gateway ID and Secret Key from the RazCrypto Dashboard.
+```
 
-PHP
+
+## Upgrading
+
+This major version is the SDK for the new RazCrypto Gateway: initialise with only your secret key (Dashboard → API apps) and use the new `/v1` API. Pin the previous major version only if you still use the old gateway.
+
+## Create a payment
+
+```php
+<?php
 require 'vendor/autoload.php';
-use RazCrypto\Api;
 
-$api = new Api("YOUR_GATEWAY_ID", "YOUR_SECRET_KEY");
-2. Create a Payment
-Create a payment to get a checkout URL. You can pass your website's Order ID in the custom_data parameter to link the payment.
+$rc = new \RazCrypto\Client(getenv('RAZCRYPTO_SECRET_KEY')); // sk_test_… or sk_live_…
 
-PHP
-try {
-    $payment = $api->payment->create([
-        "amount" => 10.50,
-        "currency" => "USDT",
-        "chain" => "BSC",
-        "email" => "customer@example.com",
-        "callback_url" => "[https://yourwebsite.com/webhook](https://yourwebsite.com/webhook)",
-        "custom_data" => [
-            "order_id" => "ORD-12345" // Link your website's order
-        ]
-    ]);
+$payment = $rc->payments()->create([
+    'amount'       => '49.00',
+    'currency'     => 'USD',
+    'reference_id' => $order->id,
+    'redirect_url' => 'https://shop.example/thanks',
+], $order->id); // idempotency key — safe to retry
 
-    // Redirect user to the checkout page OR use RazCrypto JS SDK to open in a modal
-    $checkoutUrl = $payment['checkout_page'];
-    header("Location: " . $checkoutUrl);
-    exit;
+header('Location: ' . $payment['checkout_url']);
+```
 
-} catch (\Exception $e) {
-    echo "Error: " . $e->getMessage();
-}
-3. Verify Webhook & Complete Order
-When a payment is successful, RazCrypto sends a webhook to your callback_url. Always verify the signature to ensure security.
+## API
 
-PHP
+| Area | Methods |
+|---|---|
+| Payments | `$rc->payments()->create($params, $idempotencyKey)`, `retrieve($id)`, `all($params)`, `methods($id)`, `quote($id, $chain, $coin)`, `cancel($id)`, `simulate($id, $outcome)` (test mode) |
+| Payment links | `$rc->paymentLinks()->create(...)`, `retrieve`, `all`, `update`, `deactivate` |
+| Others | `$rc->chains()`, `$rc->rates(['USDT','BNB'], 'USD')`, `$rc->merchant()`, `$rc->event($id)` |
+
+**Errors:**
+- API errors throw `RazCrypto\Exception\ApiError` with the HTTP status, `code`, `param` and request id.
+- Network problems throw `RazCrypto\Exception\ConnectionError`.
+- The client retries network errors, `429` and `5xx`.
+
+Options: `new Client($key, ['timeout' => 30, 'max_retries' => 2])`. The client talks to `https://razcryptogateway.com`
+by default; `api_base` (or env `RAZCRYPTO_API_BASE`) is only for staging or a self-hosted gateway.
+
+## Verify webhooks (Standard Webhooks)
+
+```php
 use RazCrypto\Webhook;
+use RazCrypto\Exception\SignatureVerificationError;
 
-$payload = file_get_contents('php://input');
-$signature = $_SERVER['HTTP_X_RAZCRYPTO_SIGNATURE'] ?? '';
-$secretKey = "YOUR_SECRET_KEY";
-
-if (Webhook::verifySignature($payload, $signature, $secretKey)) {
-    $data = json_decode($payload, true);
-    
-    if ($data['event'] === 'payment.completed') {
-        $paymentId = $data['payment_id'];
-        $orderId = $data['custom_data']['order_id'] ?? null;
-        
-        // TODO: Mark order as "Paid" in your database using $orderId
-    }
-    
-    http_response_code(200);
-    echo json_encode(["status" => "ok"]);
-} else {
-    http_response_code(401);
-    echo json_encode(["error" => "Invalid Signature"]);
+$raw = file_get_contents('php://input');
+try {
+    $event = Webhook::verify($raw, getallheaders(), getenv('RAZCRYPTO_WEBHOOK_SECRET')); // whsec_…
+} catch (SignatureVerificationError $e) {
+    http_response_code(400);
+    exit;
 }
-4. Fetch Payment Status Manually (Optional)
-PHP
-$status = $api->payment->fetch("payid_xxxxxxxxxx");
-echo $status['status']; // Returns: pending, completed, or expired
-Features
-Non-Custodial: Funds go directly to your wallet.
+if ($event['type'] === 'payment.paid') {
+    markOrderPaid($event['data']['reference_id']);
+}
+http_response_code(200);
+```
 
-Multi-Chain: Supports Binance Smart Chain (BSC) and Ethereum (ETH).
+`Webhook::verify()` also accepts:
+- Laravel/Symfony header bags (`$request->headers->all()`)
+- a PSR-7 request
 
-Secure: HMAC-SHA256 signature verification built-in.
+## Verify the checkout signature
 
-Developer Friendly: Clean, Razorpay-like syntax.
+```php
+use RazCrypto\CheckoutSignature;
+
+// Redirect query: ?payment_id=…&reference_id=…&status=…&signature=…
+if (!CheckoutSignature::isValid($_GET, getenv('RAZCRYPTO_WEBHOOK_SECRET'))) {
+    // do not trust it — wait for the webhook
+}
+```
+
+## Test mode
+- Use `sk_test_…` keys.
+- `$rc->payments()->simulate($id, 'paid')` runs the full flow, webhooks included.
+
+Tests: `php tests/client.php` (no PHPUnit needed). It also runs the shared vectors in `../test-vectors.json`.
+WooCommerce users: see [`../woocommerce`](../woocommerce).

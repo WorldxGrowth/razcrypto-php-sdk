@@ -1,14 +1,23 @@
 {
-    "name": "razcrypto/razcrypto-php",
-    "description": "RazCrypto Payment Gateway PHP SDK",
+    "name": "worldxgrowth/razcrypto-php-sdk",
+    "description": "Official PHP SDK for RazCrypto Gateway: payments, payment links, Standard Webhooks and checkout signature verification.",
     "type": "library",
     "license": "MIT",
+    "keywords": ["razcrypto", "crypto", "payments", "gateway", "webhooks", "standard-webhooks"],
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "ext-hash": "*"
+    },
     "autoload": {
         "psr-4": {
             "RazCrypto\\": "src/"
         }
     },
-    "require": {
-        "php": ">=7.3"
+    "scripts": {
+        "test": ["php tests/vectors.php", "php tests/client.php"]
+    },
+    "config": {
+        "sort-packages": true
     }
 }
